@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0a0e27">
+  <meta name="description" content="Wimpex - Gold-themed Snapchat-like social media app">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%230a0e27' width='180' height='180'/><text x='90' y='120' font-size='80' font-weight='900' text-anchor='middle' fill='%23d4af37'>✨</text></svg>">
+  <title>Wimpex - Gold Stories</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Auth Modals -->
+  <div id="authContainer" class="auth-container">
+    <div class="auth-card">
+      <div class="auth-header">✨ Wimpex</div>
+      <div id="authTabs" class="auth-tabs">
+        <button class="tab-btn active" data-tab="login">Login</button>
+        <button class="tab-btn" data-tab="signup">Sign Up</button>
+      </div>
+
+      <!-- Login Form -->
+      <form id="loginForm" class="auth-form active">
+        <div class="login-options">
+          <label><input type="radio" name="loginType" value="email" checked> Email</label>
+          <label><input type="radio" name="loginType" value="phone"> Phone</label>
+          <label><input type="radio" name="loginType" value="username"> Username</label>
+        </div>
+        <input id="loginInput" type="text" placeholder="Email / Phone / Username" required>
+        <input id="loginPassword" type="password" placeholder="Password" required>
+        <button type="submit" class="gold-btn">Login</button>
+        <div style="margin-top:8px;text-align:right;"><a id="forgotLink" href="#" style="color:var(--gold);font-weight:600;">Forgot password?</a></div>
+      </form>
+
+      <!-- Signup Form -->
+      <form id="signupForm" class="auth-form hidden">
+        <input id="signupUsername" type="text" placeholder="Username" maxlength="20" required>
+        <input id="signupPhone" type="tel" placeholder="Phone Number (+1-555-0000)" maxlength="15">
+        <input id="signupEmail" type="email" placeholder="Email" required>
+        
+        <!-- Gender Selection -->
+        <div class="gender-select">
+          <label>Gender</label>
+          <div class="gender-options">
+            <label class="gender-option">
+              <input type="radio" name="gender" value="male" required>
+              <span>♂️ Male</span>
+            </label>
+            <label class="gender-option">
+              <input type="radio" name="gender" value="female" required>
+              <span>♀️ Female</span>
+            </label>
+            <label class="gender-option">
+              <input type="radio" name="gender" value="other" required>
+              <span>✨ Other</span>
+            </label>
+          </div>
+        </div>
+
+        <input id="signupPassword" type="password" placeholder="Password (min 6 chars)" minlength="6" required>
+        <input id="signupConfirm" type="password" placeholder="Confirm Password" required>
+        <button type="submit" class="gold-btn">Create Account</button>
+      </form>
+
+      <div id="authError" class="auth-error hidden"></div>
+      <!-- Forgot Password Modal -->
+      <div id="forgotModal" class="modal hidden">
+        <div class="modal-content">
+          <h2>Reset Password</h2>
+          <p>Enter your email and we'll send a reset link.</p>
+          <input id="forgotEmail" type="email" placeholder="Your email">
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <button id="sendForgotBtn" class="gold-btn">Send Reset Link</button>
+            <button id="cancelForgotBtn" class="gold-btn" style="background:transparent;border:2px solid var(--gold);color:var(--gold);">Cancel</button>
+          </div>
+          <div id="forgotStatus" style="margin-top:12px;color:var(--text-secondary);"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Navigation -->
+  <nav class="topbar hidden">
+    <div class="logo">✨ Wimpex</div>
+    <div class="nav-actions">
+      <button id="storiesBtn" class="nav-btn" title="Stories">📖</button>
+      <button id="chatsBtn" class="nav-btn active" title="Messages">💬</button>
+      <button id="recommendationsBtn" class="nav-btn" title="People">👥</button>
+      <button id="cameraBtn" class="nav-btn" title="Create">📸</button>
+      <button id="enableNotificationsBtn" class="nav-btn" title="Notifications">🔔</button>
+      <button id="profileBtn" class="nav-btn" title="Profile">👤</button>
+      <button id="settingsBtn" class="nav-btn" title="Settings">⚙️</button>
+      <button id="logoutBtn" class="nav-btn" title="Logout">🚪</button>
+    </div>
+  </nav>
+
+  <!-- Main Container -->
+  <div class="main-container hidden">
+    <!-- Stories View -->
+    <div id="storiesView" class="view hidden">
+      <div class="stories-header">
+        <h2>Stories</h2>
+        <button id="newStoryBtn" class="gold-btn">+ New Story</button>
+      </div>
+      <div id="storiesGrid" class="stories-grid"></div>
+    </div>
+
+    <!-- Chat View (default) -->
+    <div id="chatsView" class="view">
+      <div class="chats-container">
+        <div class="chats-list-section">
+          <div class="chats-header">
+            <h2>Messages</h2>
+            <button id="newChatBtn" class="gold-btn">+ New Chat</button>
+          </div>
+          <div id="chatsList" class="chats-list"></div>
+        </div>
+        <div id="chatDetail" class="chat-detail hidden">
+          <div class="chat-header">
+            <button id="backToChats" class="back-btn">← Back</button>
+            <div class="chat-info">
+              <h3 id="chatName"></h3>
+              <span id="chatStatus" class="status-indicator"></span>
+            </div>
+          </div>
+          <div id="messagesLog" class="messages-log"></div>
+          <form id="messageForm" class="message-input">
+            <input id="messageInput" type="text" placeholder="Type a message..." autocomplete="off">
+            <button type="submit" class="send-btn">➤</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recommendations View -->
+    <div id="recommendationsView" class="view hidden">
+      <div class="recommendations-container">
+        <h2>👥 People You May Know</h2>
+        <div id="recommendationsList" class="recommendations-grid"></div>
+        <div id="noRecommendations" class="empty-state hidden">
+          <p>🎉 You follow everyone! Check back later for new users.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Camera/Snap Creation -->
+    <div id="cameraView" class="view hidden">
+      <div class="camera-container">
+        <video id="cameraStream" class="camera-feed" autoplay playsinline></video>
+        <div class="filter-strip">
+          <button class="filter-btn active" data-filter="none">Normal</button>
+          <button class="filter-btn" data-filter="sepia">Sepia</button>
+          <button class="filter-btn" data-filter="grayscale">B&W</button>
+          <button class="filter-btn" data-filter="invert">Invert</button>
+          <button class="filter-btn" data-filter="blur">Blur</button>
+        </div>
+        <div class="camera-controls">
+          <button id="snapBtn" class="snap-btn">📸 Snap</button>
+          <button id="recordBtn" class="record-btn">⏺ Record</button>
+          <button id="swapCameraBtn" class="swap-btn">🔄</button>
+        </div>
+        <canvas id="snapCanvas" style="display:none;"></canvas>
+      </div>
+      <div id="snapPreview" class="snap-preview hidden">
+        <img id="snapImage" src="" alt="">
+        <div class="snap-controls">
+          <button id="resnapBtn" class="ctrl-btn">Retake</button>
+          <input id="snapRecipient" type="text" placeholder="Send to username or 'story'">
+          <button id="sendSnapBtn" class="send-btn gold-btn">Send Snap</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile View -->
+    <div id="profileView" class="view hidden">
+      <div class="profile-card">
+        <img id="profileAvatar" class="avatar-large" src="" alt="">
+        <h2 id="profileName"></h2>
+        <p id="profileBio" class="bio">Snapchat enthusiast</p>
+        <div class="profile-stats">
+          <div class="stat"><strong id="friendCount">0</strong> Friends</div>
+          <div class="stat"><strong id="storyCount">0</strong> Stories</div>
+        </div>
+        <button id="editProfileBtn" class="gold-btn">Edit Profile</button>
+        <button id="addFriendsBtn" class="gold-btn">👥 Add Friends</button>
+      </div>
+    </div>
+
+    <!-- Settings View -->
+    <div id="settingsView" class="view hidden">
+      <div class="settings-container">
+        <h2>⚙️ Settings</h2>
+        <form id="settingsForm" class="settings-form">
+          
+          <!-- Avatar Section -->
+          <div class="settings-section">
+            <h3>Profile Picture</h3>
+            <div class="avatar-upload">
+              <img id="settingsAvatarPreview" class="avatar-preview" src="" alt="Profile">
+               <div id="avatarUploadProgress" class="progress hidden" style="margin-top:8px;">
+                 <div class="progress-bar" style="width:0%;height:8px;background:var(--gold);border-radius:4px;"></div>
+               </div>
+              <div class="upload-controls">
+                <input id="avatarInput" type="file" accept="image/*" style="display:none;">
+                <button type="button" id="uploadAvatarBtn" class="gold-btn">📷 Change Avatar</button>
+                <p class="hint">JPG, PNG, GIF (Max 5MB)</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Personal Info Section -->
+          <div class="settings-section">
+            <h3>Personal Information</h3>
+            
+            <div class="form-group">
+              <label>Username</label>
+              <input id="settingsUsername" type="text" placeholder="Username" maxlength="20">
+              <p class="hint">3-20 characters, letters, numbers, underscore</p>
+            </div>
+
+            <div class="form-group">
+              <label>Email</label>
+              <input id="settingsEmail" type="email" placeholder="Email">
+              <p class="hint">Used for account recovery</p>
+            </div>
+
+            <div class="form-group">
+              <label>Phone</label>
+              <input id="settingsPhone" type="tel" placeholder="+1-555-0000">
+              <p class="hint">Optional, for friend discovery</p>
+            </div>
+            
+            <div class="form-group">
+              <label>Two-Factor Authentication</label>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <button id="enable2faBtn" type="button" class="gold-btn">Enable 2FA</button>
+                <button id="disable2faBtn" type="button" class="gold-btn" style="background:transparent;border:2px solid var(--gold);color:var(--gold);">Disable 2FA</button>
+              </div>
+              <p class="hint">Protect your account with an authenticator app.</p>
+            </div>
+          </div>
+
+          <!-- Bio Section -->
+          <div class="settings-section">
+            <h3>Bio</h3>
+            <div class="form-group">
+              <textarea id="settingsBio" placeholder="Tell us about yourself..." maxlength="200"></textarea>
+              <p class="hint" id="bioCharCount">0/200 characters</p>
+            </div>
+          </div>
+
+          <!-- Save Button -->
+          <div class="settings-section">
+            <button type="submit" class="gold-btn save-btn">💾 Save Changes</button>
+            <p id="settingsStatus" class="status-message hidden"></p>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- 2FA Modal -->
+    <div id="twoFaModal" class="modal hidden">
+      <div class="modal-content" style="max-width:420px;">
+        <h2>Two-Factor Authentication</h2>
+        <div id="twoFaSetupArea" style="display:none;text-align:center;">
+          <p>Scan this QR with your authenticator app</p>
+          <img id="twoFaQr" src="" alt="QR" style="max-width:220px;border-radius:8px;border:2px solid rgba(212,175,55,0.1);">
+          <p class="hint">Or enter secret: <span id="twoFaSecret"></span></p>
+          <input id="twoFaSetupCode" placeholder="Enter code from app" />
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <button id="confirm2faBtn" class="gold-btn">Enable 2FA</button>
+            <button id="cancel2faBtn" class="gold-btn" style="background:transparent;border:2px solid var(--gold);color:var(--gold);">Cancel</button>
+          </div>
+          <div id="twoFaSetupStatus" class="hint"></div>
+        </div>
+
+        <div id="twoFaLoginArea" style="display:none;text-align:center;">
+          <p>Enter your authenticator code to continue</p>
+          <input id="twoFaLoginCode" placeholder="6-digit code" />
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <button id="submit2faLoginBtn" class="gold-btn">Verify</button>
+            <button id="cancel2faLoginBtn" class="gold-btn" style="background:transparent;border:2px solid var(--gold);color:var(--gold);">Cancel</button>
+          </div>
+          <div id="twoFaLoginStatus" class="hint"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Onboarding Modal -->
+  <div id="onboardingModal" class="modal hidden">
+    <div class="modal-content" style="max-width:520px;">
+      <h2>Welcome to Wimpex</h2>
+      <div id="onboardingStep1" class="onboard-step">
+        <p>Step 1: Add a profile picture and a short bio so people know who you are.</p>
+        <button id="onboardingNext1" class="gold-btn">Next</button>
+      </div>
+      <div id="onboardingStep2" class="onboard-step hidden">
+        <p>Step 2: Find people you know — check recommendations and add friends.</p>
+        <button id="onboardingNext2" class="gold-btn">Next</button>
+      </div>
+      <div id="onboardingStep3" class="onboard-step hidden">
+        <p>Step 3: Enable notifications so you never miss a snap.</p>
+        <button id="onboardingFinish" class="gold-btn">Finish</button>
+        <button id="onboardingSkip" class="gold-btn" style="background:transparent;border:2px solid var(--gold);color:var(--gold);margin-left:8px;">Skip</button>
+      </div>
+      <div id="onboardingStatus" class="hint"></div>
+    </div>
+  </div>
+
+  <!-- Story Viewer Modal -->
+  <div id="storyViewerModal" class="modal hidden">
+    <div class="story-viewer">
+      <button id="closeStoryViewer" class="close-btn">✕</button>
+      <div class="story-content">
+        <img id="storyImage" src="" alt="" style="display:none;">
+        <video id="storyVideo" style="display:none;" autoplay></video>
+        <div class="story-progress-bar"></div>
+      </div>
+      <div class="story-info">
+        <strong id="storyUsername"></strong>
+        <span id="storyTimestamp"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Profile Modal -->
+  <div id="editProfileModal" class="modal hidden">
+    <div class="modal-content">
+      <h2>Edit Profile</h2>
+      <form id="editProfileForm">
+        <input id="editBio" type="text" placeholder="Bio" maxlength="100">
+        <button type="submit" class="gold-btn">Save</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Friends Modal -->
+  <div id="friendsModal" class="modal hidden">
+    <div class="modal-content">
+      <h2>👥 Add Friends</h2>
+      <form id="addFriendForm">
+        <input id="friendInput" type="text" placeholder="Username or Phone Number">
+        <button type="submit" class="gold-btn">Add Friend</button>
+      </form>
+      <div id="friendsList" class="friends-list"></div>
+      <button class="close-modal-btn">Close</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

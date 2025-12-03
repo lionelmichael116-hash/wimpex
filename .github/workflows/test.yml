@@ -1,0 +1,50 @@
+name: Upload E2E Tests
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      server:
+        image: node:18
+        options: >-
+          --health-cmd="curl -f http://localhost:3000 || exit 1"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install server deps
+        run: cd server && npm install --production
+      
+      - name: Start server
+        run: cd server && npm start &
+        env:
+          NODE_ENV: test
+          JWT_SECRET: test_secret_key
+      
+      - name: Wait for server
+        run: |
+          for i in {1..30}; do
+            curl -f http://localhost:3000 && break || (echo "Waiting... $i/30" && sleep 1)
+          done
+      
+      - name: Run upload tests
+        run: cd server && npm run test:e2e
+      
+      - name: Check server logs
+        if: failure()
+        run: cd server && tail -100 server.log || true

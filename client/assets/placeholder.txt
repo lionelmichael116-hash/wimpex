@@ -1,0 +1,1 @@
+Add story images named story1.jpg etc into this folder if desired.
